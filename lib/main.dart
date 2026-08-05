@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'privacy_policy_screen.dart';
+import 'screens/about_us_screen.dart';
+import 'screens/dos_and_donts_screen.dart';
+import 'package:share_plus/share_plus.dart';
+import 'live_weather_screen.dart';
 
 void main() {
   runApp(const ResilioMeshApp());
@@ -67,10 +71,7 @@ class IndianDisasterLogo extends StatelessWidget {
             height: size * 0.90,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.white,
-                width: size * 0.03,
-              ),
+              border: Border.all(color: Colors.white, width: size * 0.03),
             ),
           ),
           Container(
@@ -216,8 +217,9 @@ class _SplashScreenState extends State<SplashScreen>
                   height: 22,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.5,
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(Color(0xFFFF5252)),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xFFFF5252),
+                    ),
                   ),
                 ),
               ),
@@ -261,18 +263,17 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.white,
         selectedItemColor: const Color(0xFFFF5252),
         unselectedItemColor: const Color(0xFF9E9E9E),
-        selectedLabelStyle:
-            const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+        selectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
         unselectedLabelStyle: const TextStyle(fontSize: 12),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_rounded),
             label: 'Home',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map_rounded),
-            label: 'Map',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.map_rounded), label: 'Map'),
           BottomNavigationBarItem(
             icon: Icon(Icons.radio_button_checked, color: Colors.redAccent),
             label: 'SOS',
@@ -304,8 +305,10 @@ class DashboardContent extends StatelessWidget {
           child: SafeArea(
             bottom: false,
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8.0,
+                vertical: 8.0,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -378,31 +381,47 @@ class DashboardContent extends StatelessWidget {
                     crossAxisCount: 3,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
-                    children: const [
+                    children: [
                       DashboardItem(
                         icon: Icons.wb_sunny_outlined,
-                        label: 'Live\nWeather',
+                        label: 'Live Weather',
                         iconColor: Color(0xFFFF9800),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LiveWeatherScreen(),
+                            ),
+                          );
+                        },
                       ),
-                      DashboardItem(
+                      const DashboardItem(
                         icon: Icons.grain_outlined,
                         label: 'IMD\nForecast',
                         iconColor: Color(0xFF9C27B0),
                       ),
-                      DashboardItem(
+                      const DashboardItem(
                         icon: Icons.phone_in_talk_outlined,
                         label: 'Emergency\nContact',
                         iconColor: Color(0xFFF44336),
                       ),
-                      DashboardItem(
+                      const DashboardItem(
                         icon: Icons.add_moderator_outlined,
                         label: 'Safety\nTips',
                         iconColor: Color(0xFF4CAF50),
                       ),
                       DashboardItem(
                         icon: Icons.assignment_outlined,
-                        label: "Do's /\nDon't",
-                        iconColor: Color(0xFF673AB7),
+                        label: "Do's / \nDon't",
+                        iconColor: const Color(0xFF673AB7),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const DosAndDontsScreen(),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -421,12 +440,14 @@ class DashboardItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color iconColor;
+  final VoidCallback? onTap; // Added optional onTap callback
 
   const DashboardItem({
     super.key,
     required this.icon,
     required this.label,
     required this.iconColor,
+    this.onTap,
   });
 
   @override
@@ -447,17 +468,14 @@ class DashboardItem extends StatelessWidget {
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(18),
         child: InkWell(
-          onTap: () {},
+          onTap:
+              onTap ?? () {}, // Uses passed onTap or defaults to empty function
           borderRadius: BorderRadius.circular(18),
           splashColor: iconColor.withAlpha(26),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                size: 36,
-                color: iconColor,
-              ),
+              Icon(icon, size: 36, color: iconColor),
               const SizedBox(height: 8),
               Text(
                 label,
@@ -478,7 +496,7 @@ class DashboardItem extends StatelessWidget {
 }
 
 // ==========================================
-// APP DRAWER (UPDATED WITH ABOUT US)
+// APP DRAWER (UPDATED WITH ABOUT US NAVIGATION)
 // ==========================================
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -493,34 +511,41 @@ class AppDrawer extends StatelessWidget {
           const SizedBox(height: 20),
           const Divider(height: 1, indent: 20, endIndent: 20),
           const SizedBox(height: 10),
-          _buildDrawerTile(
-            Icons.home_outlined,
-            'Home',
-            () {
-              Navigator.pop(context);
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const HomeScreen()),
-              );
-            },
-          ),
-          _buildDrawerTile(
-            Icons.info_outline_rounded,
-            'About Us',
-            () {},
-          ),
+          _buildDrawerTile(Icons.home_outlined, 'Home', () {
+            Navigator.pop(context);
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+            );
+          }),
+          // ABOUT US TILE (Kept in place and updated with navigation)
+          _buildDrawerTile(Icons.info_outline_rounded, 'About Us', () {
+            Navigator.pop(context);
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (context) => AboutUsScreen()));
+          }),
+
           _buildDrawerTile(Icons.notifications_none_rounded, 'Alert', () {}),
-          _buildDrawerTile(
-            Icons.privacy_tip_outlined,
-            'Privacy Policy',
-            () {
-              Navigator.pop(context);
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                    builder: (context) => const PrivacyPolicyScreen()),
-              );
-            },
-          ),
-          _buildDrawerTile(Icons.share_outlined, 'Share App', () {}),
+          _buildDrawerTile(Icons.privacy_tip_outlined, 'Privacy Policy', () {
+            Navigator.pop(context);
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const PrivacyPolicyScreen(),
+              ),
+            );
+          }),
+
+          _buildDrawerTile(Icons.share_outlined, 'Share App', () {
+            Navigator.pop(context);
+            final box = context.findRenderObject() as RenderBox?;
+            Share.share(
+              'Check out ResilioMesh - an offline-first P2P emergency mesh platform for disaster safety and communication. Download it here: https://github.com/Priya-Nijwante/ResilioMesh.git',
+              subject: 'ResilioMesh Emergency App',
+              sharePositionOrigin: box != null
+                  ? box.localToGlobal(Offset.zero) & box.size
+                  : null,
+            );
+          }),
           _buildDrawerTile(Icons.star_outline_rounded, 'Rate Us', () {}),
           const Spacer(),
           const Padding(
@@ -534,6 +559,14 @@ class AppDrawer extends StatelessWidget {
               ),
             ),
           ),
+          _buildDrawerTile(Icons.wb_sunny_outlined, 'Live Weather', () {
+            Navigator.pop(context); // Close the drawer
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const LiveWeatherScreen(),
+              ),
+            );
+          }),
         ],
       ),
     );
