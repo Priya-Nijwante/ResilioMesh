@@ -1,12 +1,106 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'privacy_policy_screen.dart';
 
-void main() {
+// Top-level background notification handler
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   runApp(const ResilioMeshApp());
 }
 
-class ResilioMeshApp extends StatelessWidget {
+class ResilioMeshApp extends StatefulWidget {
   const ResilioMeshApp({super.key});
+
+  @override
+  State<ResilioMeshApp> createState() => _ResilioMeshAppState();
+}
+
+class _ResilioMeshAppState extends State<ResilioMeshApp> {
+  @override
+  void initState() {
+    super.initState();
+    _setupFCMAndLocation();
+  }
+
+  Future<void> _setupFCMAndLocation() async {
+    try {
+      // 1. Request Notification Permissions
+      FirebaseMessaging messaging = FirebaseMessaging.instance;
+      NotificationSettings settings = await messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+
+      if (settings.authorizationStatus != AuthorizationStatus.authorized) {
+        return;
+      }
+
+      // 2. Request Location Permissions
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) return;
+      }
+
+      if (permission == LocationPermission.deniedForever) return;
+
+      // 3. Get User Current GPS Location
+      Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+     );
+
+      // 4. Get FCM Device Token
+      String? token = await messaging.getToken();
+      if (token != null) {
+        await _sendTokenAndLocationToBackend(
+          token,
+          position.latitude,
+          position.longitude,
+        );
+      }
+
+      // 5. Listen to Foreground Alerts
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        if (message.notification != null) {
+          debugPrint("Foreground Alert Received: ${message.notification?.title}");
+        }
+      });
+    } catch (e) {
+      debugPrint("Error registering device: $e");
+    }
+  }
+
+  Future<void> _sendTokenAndLocationToBackend(
+      String token, double lat, double lon) async {
+    // Note: Use 10.0.2.2 for Android Emulator, or your server's IP address
+    final url = Uri.parse('http://10.0.2.2:8080/api/users/update-device');
+
+    try {
+      await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'fcmToken': token,
+          'latitude': lat,
+          'longitude': lon,
+        }),
+      );
+    } catch (e) {
+      debugPrint("Failed to send token to Spring Boot API: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

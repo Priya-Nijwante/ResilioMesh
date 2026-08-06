@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "887855523558",
+    "project_id": "resiliomesh",
+    "storage_bucket": "resiliomesh.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:887855523558:android:760e87c871cb25ce1f7d27",
+        "android_client_info": {
+          "package_name": "com.example.resilio_mesh"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmjEpshBT08JdcIbuHJ0ujRuofDibxh_s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
